@@ -1,35 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, useEffect } from 'react'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+function App(){
+  const API_URL = 'https://uselessfacts.jsph.pl/random.json?language=en';
+  
+  const [fact, setFact] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
+  const fetchFact = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      setFact(data.text);
+    } catch (error) {
+      console.error('Error fetching fact:', error);
+      setFact('Failed to load fact');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFact();
+  }, []);
+
+  return(
+    <div className="container">
+      <h1>✨ Fun Facts</h1>
+      <div className="fact-box">
+        <p className={loading ? 'loading' : 'fact-text'}>
+          {loading ? 'Loading...' : (fact || 'Click the button to get started!')}
         </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+      <button onClick={fetchFact} disabled={loading}>
+        {loading ? 'Loading...' : '🎲 Get New Fact'}
+      </button>
+    </div>
+  );
 }
 
-export default App
+export default App; 
